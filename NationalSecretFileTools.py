@@ -10,6 +10,7 @@ import lz4.block
 from lz4.frame import compress, decompress
 import hashlib
 from gmssl.sm4 import CryptSM4, SM4_ENCRYPT, SM4_DECRYPT
+from lz4.frame._frame import BLOCKSIZE_MAX4MB
 
 
 class SM4:
@@ -111,7 +112,17 @@ class Lz4Util:
         压缩文件
         """
         try:
-            with open(out_file, 'wb') as out:
+            with lz4.frame.open(out_file, mode='wb', encoding=None,
+                                errors=None,
+                                newline=None,
+                                block_size=BLOCKSIZE_MAX4MB,
+                                block_linked=False,
+                                compression_level=0,
+                                content_checksum=False,
+                                block_checksum=False,
+                                auto_flush=False,
+                                return_bytearray=False,
+                                source_size=0) as out:
                 with open(src_file, 'rb') as inFile:
                     out.write(compress(inFile.read()))
                 out.flush()
@@ -145,4 +156,8 @@ if __name__ == '__main__':
     sm4_tools = Sm4FileEncryptUtil(secret='5a7d371e8ef22fc887504b3881499175')
     sm4_tools.encrypt_file('hello.txt', 'hello.sm4')
     sm4_tools.decrypt_file('hello.sm4', 'decrypt_hello.txt')
+
+    print(Sm3FileHashUtil.get_file_sm3_hash('hello.sm4'))
+    print(Sm3FileHashUtil.get_file_sm3_hash('compress_hello.lz4'))
+
 
